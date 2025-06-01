@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import minimize
 
 # Função sigmoide
 def sigmoid(z):
@@ -26,10 +27,31 @@ w0 = np.zeros(n)
 
 """ IMPLEMENTE AQUI A CHAMADA DO ALGORTIMO DE OTIMIZAÇÃO """
 
+# Gradiente da função-objetivo
+def gradiente(w):
+    dados = np.load('questao2_dados.npz')
+    X = dados['X']
+    y = dados['y']
+    m = X.shape[0]
+    lambd = 0.1
+
+    h = sigmoid(X @ w)
+    grad = (1 / m) * (X.T @ (h - y)) + lambd * w
+    return grad
+
+# Otimização com gradientes conjugados (Fletcher-Reeves)
+resultado = minimize(
+    fun=funcaoobjetivo,
+    x0=w0,
+    method='CG',
+    jac=gradiente,
+    options={'disp': True, 'maxiter': 1000}
+)
+
 # Pesos otimizados
-custo_final = ???
-numero_iteracoes = ???
-numero_avaliacoes = ???
+custo_final = resultado.fun
+numero_iteracoes = resultado.nit
+numero_avaliacoes = resultado.nfev
 print(f"Custo final: {custo_final:.4f}")
 print(f"Número de iterações: {numero_iteracoes}")
 print(f"Número de avaliações da função-objetivo: {numero_avaliacoes}")

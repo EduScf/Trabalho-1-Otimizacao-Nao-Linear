@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
+from scipy.optimize import minimize
 
 # Função que representa o sistema de controle (sistema de primeira ordem)
 def system(T, t, u):
@@ -58,22 +59,27 @@ ponto_inicial = [1.0, 0.1, 0.01]
 
 """ IMPLEMENTE AQUI A CHAMADA DO ALGORTIMO DE OTIMIZAÇÃO """
 
+resultado = minimize(funcaoobjetivo, ponto_inicial, method='BFGS')
+
 # Extraia aqui os parâmetros PID otimizados
-Kp_opt, Ki_opt, Kd_opt = ##
+Kp_opt, Ki_opt, Kd_opt = resultado.x
 
-# Simulação final com os parâmetros otimizados
-response_opt = simulate_pid(Kp_opt, Ki_opt, Kd_opt)
-
-# Plotar a resposta do sistema
+# Parâmetros de simulação
 T_ref = 100.0
-t = np.linspace(0, 10, 100)
+T0 = 25.0
+t = np.linspace(0, 100, 1000)
+
+# Respostas do sistema
+response_init = simulate_pid(*ponto_inicial, T_ref, T0, t)
+response_opt = simulate_pid(Kp_opt, Ki_opt, Kd_opt, T_ref, T0, t)
+
+# Plot comparativo
+plt.plot(t, response_init, label=f'Inicial: Kp={ponto_inicial[0]}, Ki={ponto_inicial[1]}, Kd={ponto_inicial[2]}')
 plt.plot(t, response_opt, label=f'Otimizado: Kp={Kp_opt:.2f}, Ki={Ki_opt:.2f}, Kd={Kd_opt:.2f}')
 plt.axhline(y=T_ref, color='r', linestyle='--', label='Referência')
 plt.xlabel('Tempo')
 plt.ylabel('Temperatura')
+plt.title('Resposta do Sistema com Controle PID')
 plt.legend()
-plt.title('Resposta do Sistema Controlado (PID Otimizado)')
+plt.grid(True)
 plt.show()
-
-# Exibir os parâmetros otimizados
-print(f"Parâmetros PID otimizados: Kp={Kp_opt:.2f}, Ki={Ki_opt:.2f}, Kd={Kd_opt:.2f}")
